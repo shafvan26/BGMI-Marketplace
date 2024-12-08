@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell BGMI Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .bg-gaming-gradient {
+            background: linear-gradient(135deg, #1a1c2c 0%, #2a2d3e 100%);
+        }
+        .bg-card-gradient {
+            background: linear-gradient(135deg, #2a2d3e 0%, #353849 100%);
+        }
+        .hover-glow:hover {
+            box-shadow: 0 0 15px rgba(66, 153, 225, 0.5);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gaming-gradient text-gray-100">
+    <nav class="bg-black bg-opacity-40 backdrop-filter backdrop-blur-lg border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center p-4">
+            <a href="/frontend/index.html" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">BGMI Market</a>
+            <div class="space-x-6">
+                <a href="/frontend/buy.html" class="hover:text-blue-400 transition-colors">Buy</a>
+                <a href="/frontend/sell.html" class="hover:text-blue-400 transition-colors">Sell</a>
+                <a href="/frontend/contact.html" class="hover:text-blue-400 transition-colors">Contact</a>
+                <a href="/frontend/admin.html" class="hover:text-blue-400 transition-colors">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 p-4">
+        <div class="max-w-2xl mx-auto">
+            <h1 class="text-4xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Sell Your BGMI Account</h1>
+            
+            <div class="bg-card-gradient rounded-lg p-8 shadow-lg">
+                <form id="sellForm" class="space-y-6">
+                    <div>
+                        <label class="block text-gray-300 mb-2">Account Level</label>
+                        <input type="number" id="level" required class="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2">Rank</label>
+                        <select id="rank" required class="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100">
+                            <option value="">Select Rank</option>
+                            <option value="Bronze">Bronze</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Platinum">Platinum</option>
+                            <option value="Diamond">Diamond</option>
+                            <option value="Crown">Crown</option>
+                            <option value="Ace">Ace</option>
+                            <option value="Conqueror">Conqueror</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2">Skins (comma separated)</label>
+                        <input type="text" id="skins" required class="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100" placeholder="M416 Glacier, AKM Dragon, etc.">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2">Price (₹)</label>
+                        <input type="number" id="price" required class="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2">Description</label>
+                        <textarea id="description" required class="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100 h-32" placeholder="Describe your account..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2">Contact Information</label>
+                        <input type="text" id="contactInfo" required class="w-full bg-black bg-opacity-50 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100" placeholder="Email or Phone Number">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 hover-glow">
+                        Submit Listing
+                    </button>
+
+                    <div id="errorMessage" class="hidden text-red-400 text-center text-sm bg-red-900 bg-opacity-20 p-3 rounded-lg"></div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('sellForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Disable button and show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Submitting...';
+            errorMessage.classList.add('hidden');
+            
+            const formData = {
+                level: parseInt(document.getElementById('level').value),
+                rank: document.getElementById('rank').value,
+                skins: document.getElementById('skins').value,
+                price: parseFloat(document.getElementById('price').value),
+                description: document.getElementById('description').value,
+                contact_info: document.getElementById('contactInfo').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/accounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.detail || 'Failed to create listing');
+                }
+
+                // Show success message
+                alert('Account listed successfully! It will be visible after admin approval.');
+                
+                // Clear form
+                e.target.reset();
+                
+                // Redirect to buy page
+                window.location.href = '/frontend/buy.html';
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = error.message;
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // Re-enable button and restore text
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Submit Listing';
+            }
+        });
+    </script>
+</body>
+</html>

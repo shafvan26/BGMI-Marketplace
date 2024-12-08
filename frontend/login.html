@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - BGMI Market</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .bg-gaming-gradient {
+            background: linear-gradient(135deg, #1a1c2c 0%, #2a2d3e 100%);
+        }
+        .bg-card-gradient {
+            background: linear-gradient(135deg, #2a2d3e 0%, #353849 100%);
+        }
+        .hover-glow:hover {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(66, 153, 225, 0.5);
+            transform: translateY(-2px);
+        }
+        .login-box {
+            background: rgba(42, 45, 62, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gaming-gradient text-gray-100 min-h-screen">
+    <nav class="bg-black bg-opacity-40 backdrop-filter backdrop-blur-lg border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center p-4">
+            <a href="/frontend/index.html" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">BGMI Market</a>
+            <div class="space-x-6">
+                <a href="/frontend/buy.html" class="hover:text-blue-400 transition-colors">Buy</a>
+                <a href="/frontend/sell.html" class="hover:text-blue-400 transition-colors">Sell</a>
+                <a href="/frontend/contact.html" class="hover:text-blue-400 transition-colors">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-16 p-4 flex justify-center items-center">
+        <div class="w-full max-w-md">
+            <div class="login-box p-8 rounded-2xl shadow-2xl">
+                <div class="text-center mb-8">
+                    <img src="https://www.battlegroundsmobileindia.com/common/img/main/logo.png" 
+                         alt="BGMI Logo" 
+                         class="h-16 mx-auto mb-6 hover-glow">
+                    <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                        Admin Login
+                    </h2>
+                </div>
+
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                        <input type="text" 
+                               id="username" 
+                               required 
+                               class="w-full px-4 py-3 bg-card-gradient border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100"
+                               placeholder="Enter your username">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" 
+                               id="password" 
+                               required 
+                               class="w-full px-4 py-3 bg-card-gradient border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100"
+                               placeholder="Enter your password">
+                    </div>
+
+                    <button type="submit" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 hover-glow">
+                        Login
+                    </button>
+
+                    <div id="errorMessage" class="hidden text-red-400 text-center text-sm bg-red-900 bg-opacity-20 p-3 rounded-lg"></div>
+                </form>
+
+                <div class="mt-6 text-center text-sm text-gray-400">
+                    <a href="/frontend/index.html" class="hover:text-blue-400 transition-colors">← Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            
+            // Disable the submit button and show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="inline-flex items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Logging in...</span>';
+            errorMessage.classList.add('hidden');
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('username', username);
+                formData.append('password', password);
+
+                const response = await fetch('http://127.0.0.1:8000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Invalid credentials');
+                }
+                
+                // Store the token
+                localStorage.setItem('adminToken', data.access_token);
+                
+                // Show success state briefly before redirect
+                submitButton.innerHTML = '<span class="inline-flex items-center"><svg class="h-5 w-5 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Success!</span>';
+                
+                // Redirect to admin panel
+                setTimeout(() => {
+                    window.location.href = '/frontend/admin.html';
+                }, 500);
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message || 'Login failed. Please check your credentials.';
+                errorMessage.classList.remove('hidden');
+                
+                // Shake animation on error
+                submitButton.classList.add('animate-shake');
+                setTimeout(() => submitButton.classList.remove('animate-shake'), 500);
+            } finally {
+                // Re-enable the submit button and restore text
+                submitButton.disabled = false;
+                if (!submitButton.innerHTML.includes('Success')) {
+                    submitButton.innerHTML = 'Login';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
