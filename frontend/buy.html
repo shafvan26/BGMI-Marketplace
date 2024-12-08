@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy BGMI Accounts</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .bg-gaming-gradient {
+            background: linear-gradient(135deg, #1a1c2c 0%, #2a2d3e 100%);
+        }
+        .bg-card-gradient {
+            background: linear-gradient(135deg, #2a2d3e 0%, #353849 100%);
+        }
+        .hover-glow:hover {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(66, 153, 225, 0.5);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-gaming-gradient text-gray-100">
+    <nav class="bg-black bg-opacity-40 backdrop-filter backdrop-blur-lg border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center p-4">
+            <a href="/frontend/index.html" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">BGMI Market</a>
+            <div class="space-x-6">
+                <a href="/frontend/buy.html" class="hover:text-blue-400 transition-colors">Buy</a>
+                <a href="/frontend/sell.html" class="hover:text-blue-400 transition-colors">Sell</a>
+                <a href="/frontend/contact.html" class="hover:text-blue-400 transition-colors">Contact</a>
+                <button id="loginBtn" class="bg-white text-indigo-600 px-6 py-2 rounded-lg font-medium hover:bg-indigo-50 transition-colors">Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-8 p-4">
+        <h1 class="text-4xl font-bold mb-8 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Available BGMI Accounts</h1>
+        
+        <!-- Filters -->
+        <div class="mb-8 flex flex-wrap gap-4 justify-center">
+            <input type="text" id="searchInput" placeholder="Search accounts..." class="bg-card-gradient border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100">
+            <select id="rankFilter" class="bg-card-gradient border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100">
+                <option value="">All Ranks</option>
+                <option value="Bronze">Bronze</option>
+                <option value="Silver">Silver</option>
+                <option value="Gold">Gold</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Diamond">Diamond</option>
+                <option value="Crown">Crown</option>
+                <option value="Ace">Ace</option>
+                <option value="Conqueror">Conqueror</option>
+            </select>
+            <select id="priceFilter" class="bg-card-gradient border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-100">
+                <option value="">All Prices</option>
+                <option value="0-1000">₹0 - ₹1000</option>
+                <option value="1001-5000">₹1001 - ₹5000</option>
+                <option value="5001-10000">₹5001 - ₹10000</option>
+                <option value="10001+">₹10000+</option>
+            </select>
+        </div>
+
+        <!-- Accounts Grid -->
+        <div id="accountsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Accounts will be populated here -->
+        </div>
+
+        <!-- Account Details Modal -->
+        <div id="accountModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center backdrop-filter backdrop-blur-sm">
+            <div class="bg-card-gradient rounded-lg p-8 max-w-md w-full mx-4 transform transition-all">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Account Details</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-gray-400">Level</p>
+                        <p id="modalLevel" class="text-white text-lg"></p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Rank</p>
+                        <p id="modalRank" class="text-white text-lg"></p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Skins</p>
+                        <p id="modalSkins" class="text-white text-lg"></p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Price</p>
+                        <p id="modalPrice" class="text-white text-lg"></p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Description</p>
+                        <p id="modalDescription" class="text-white text-lg"></p>
+                    </div>
+                    <a id="whatsappLink" target="_blank" class="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg text-center transition-all duration-300 hover-glow mt-6">
+                        <div class="flex items-center justify-center space-x-2">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-3.825 3.113-6.937 6.937-6.937 1.856.001 3.598.723 4.907 2.034 1.31 1.311 2.031 3.054 2.03 4.908-.001 3.825-3.113 6.938-6.937 6.938z"/>
+                            </svg>
+                            <span>Contact on WhatsApp</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            async function fetchAccounts() {
+                try {
+                    const response = await fetch('http://127.0.0.1:8000/accounts');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch accounts');
+                    }
+                    const accounts = await response.json();
+                    displayAccounts(accounts);
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('accountsContainer').innerHTML = `
+                        <div class="col-span-full text-center text-red-400 bg-red-900 bg-opacity-20 p-4 rounded-lg">
+                            Failed to load accounts. Please try again later.
+                        </div>
+                    `;
+                }
+            }
+
+            function displayAccounts(accounts) {
+                const container = document.getElementById('accountsContainer');
+                if (accounts.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center text-gray-400 bg-gray-800 bg-opacity-20 p-8 rounded-lg">
+                            No accounts available at the moment.
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = accounts.map(account => `
+                    <div class="bg-card-gradient rounded-lg p-6 shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-xl font-bold">Level ${account.level}</h3>
+                                    <p class="text-blue-400">${account.rank}</p>
+                                </div>
+                                <p class="text-2xl font-bold text-green-400">₹${account.price}</p>
+                            </div>
+                            <p class="text-gray-300 line-clamp-2">${account.description}</p>
+                            <button onclick="showAccountDetails(${JSON.stringify(account).replace(/"/g, '&quot;')})" 
+                                    class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 hover-glow">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function showAccountDetails(account) {
+                document.getElementById('modalLevel').textContent = account.level;
+                document.getElementById('modalRank').textContent = account.rank;
+                document.getElementById('modalSkins').textContent = account.skins;
+                document.getElementById('modalPrice').textContent = `₹${account.price}`;
+                document.getElementById('modalDescription').textContent = account.description;
+                
+                // Format WhatsApp message with account ID
+                const message = `Hi, I'm interested in BGMI Account #${account.id} (Level ${account.level}, ${account.rank}) listed for ₹${account.price}`;
+                // Use the fixed WhatsApp number
+                document.getElementById('whatsappLink').href = `https://wa.me/919746078283?text=${encodeURIComponent(message)}`;
+                
+                document.getElementById('accountModal').classList.remove('hidden');
+                document.getElementById('accountModal').classList.add('flex');
+            }
+
+            function closeModal() {
+                document.getElementById('accountModal').classList.add('hidden');
+                document.getElementById('accountModal').classList.remove('flex');
+            }
+
+            // Close modal when clicking outside
+            document.getElementById('accountModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('accountModal')) {
+                    closeModal();
+                }
+            });
+
+            // Fetch accounts when page loads
+            fetchAccounts();
+        </script>
+    </main>
+</body>
+</html>

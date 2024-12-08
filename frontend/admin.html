@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BGMI Market</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .bg-gaming-gradient {
+            background: linear-gradient(135deg, #1a1c2c 0%, #2a2d3e 100%);
+        }
+        .bg-card-gradient {
+            background: linear-gradient(135deg, #2a2d3e 0%, #353849 100%);
+        }
+        .hover-glow:hover {
+            box-shadow: 0 0 15px rgba(66, 153, 225, 0.5);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        .admin-card {
+            background: rgba(42, 45, 62, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gaming-gradient text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-black bg-opacity-40 backdrop-filter backdrop-blur-lg border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center p-4">
+            <a href="/frontend/index.html" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">BGMI Market Admin</a>
+            <div class="space-x-6">
+                <a href="/frontend/buy.html" class="hover:text-blue-400 transition-colors">Buy</a>
+                <a href="/frontend/sell.html" class="hover:text-blue-400 transition-colors">Sell</a>
+                <a href="/frontend/admin.html" class="hover:text-blue-400 transition-colors">Admin</a>
+                <button id="logoutBtn" class="bg-white text-indigo-600 px-6 py-2 rounded-lg font-medium hover:bg-indigo-50 transition-colors">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Admin Dashboard</h1>
+            <select id="statusFilter" class="bg-card-gradient text-gray-100 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+            </select>
+            <button id="refreshBtn" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 transition-colors">
+                Refresh
+            </button>
+        </div>
+
+        <!-- Accounts Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="admin-card p-6 rounded-xl">
+                <h3 class="text-lg font-medium text-indigo-200">Total Accounts</h3>
+                <p class="text-3xl font-bold mt-2" id="totalAccounts">0</p>
+            </div>
+            <div class="admin-card p-6 rounded-xl">
+                <h3 class="text-lg font-medium text-indigo-200">Pending Approval</h3>
+                <p class="text-3xl font-bold mt-2" id="pendingAccounts">0</p>
+            </div>
+            <div class="admin-card p-6 rounded-xl">
+                <h3 class="text-lg font-medium text-indigo-200">Total Value</h3>
+                <p class="text-3xl font-bold mt-2" id="totalValue">₹0</p>
+            </div>
+        </div>
+
+        <!-- Accounts Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left border-b border-white/10">
+                        <th class="py-3 px-4 text-indigo-200 font-medium">Level</th>
+                        <th class="py-3 px-4 text-indigo-200 font-medium">Rank</th>
+                        <th class="py-3 px-4 text-indigo-200 font-medium">Price</th>
+                        <th class="py-3 px-4 text-indigo-200 font-medium">Status</th>
+                        <th class="py-3 px-4 text-indigo-200 font-medium">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="accountsTable">
+                    <!-- Accounts will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Account Details Modal -->
+    <div id="accountModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-card-gradient rounded-lg p-8 max-w-2xl w-full mx-4">
+            <div id="modalContent">
+                <!-- Modal content will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/frontend/login.html';
+                return;
+            }
+            return token;
+        }
+
+        // Function to fetch and display accounts
+        async function fetchAccounts(status = 'all') {
+            const token = checkAuth();
+            if (!token) {
+                window.location.href = '/frontend/login.html';
+                return;
+            }
+
+            const accountsTable = document.getElementById('accountsTable');
+            accountsTable.innerHTML = '<tr><td colspan="5" class="text-center py-4">Loading accounts...</td></tr>';
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/admin/accounts', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    window.location.href = '/frontend/login.html';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const accounts = await response.json();
+                
+                // Update stats
+                document.getElementById('totalAccounts').textContent = accounts.length;
+                document.getElementById('pendingAccounts').textContent = accounts.filter(a => !a.approved).length;
+                document.getElementById('totalValue').textContent = '₹' + accounts.reduce((sum, a) => sum + a.price, 0).toFixed(2);
+
+                // Filter accounts based on status
+                const filteredAccounts = status === 'all' 
+                    ? accounts 
+                    : accounts.filter(a => (status === 'approved' ? a.approved : !a.approved));
+
+                // Update table
+                accountsTable.innerHTML = '';
+
+                if (filteredAccounts.length === 0) {
+                    accountsTable.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-400">No accounts found</td></tr>';
+                    return;
+                }
+
+                filteredAccounts.forEach(account => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-white/10 hover:bg-white/5';
+                    row.innerHTML = `
+                        <td class="py-3 px-4">${account.level}</td>
+                        <td class="py-3 px-4">${account.rank}</td>
+                        <td class="py-3 px-4">₹${account.price.toFixed(2)}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-full text-sm ${account.approved ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">
+                                ${account.approved ? 'Approved' : 'Pending'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex space-x-2">
+                                <button onclick="viewAccount(${JSON.stringify(account).replace(/"/g, '&quot;')})" 
+                                        class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-lg transition-colors">
+                                    View
+                                </button>
+                                ${!account.approved ? `
+                                <button onclick="approveAccount(${account.id})" 
+                                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg transition-colors">
+                                    Approve
+                                </button>` : ''}
+                                <button onclick="deleteAccount(${account.id})" 
+                                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition-colors">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    accountsTable.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                accountsTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <div class="text-red-400 mb-2">Failed to fetch accounts</div>
+                            <div class="text-sm text-gray-400">${error.message}</div>
+                            <button onclick="fetchAccounts()" class="mt-4 bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                Try Again
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Function to view account details
+        function viewAccount(account) {
+            const modal = document.getElementById('accountModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalContent.innerHTML = `
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                        Account Details
+                    </h2>
+                    <button onclick="closeModal()" class="text-indigo-200 hover:text-white transition-colors text-2xl">&times;</button>
+                </div>
+                <div class="space-y-4 text-indigo-200">
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <p class="font-medium">Level: <span class="text-white">${account.level}</span></p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <p class="font-medium">Rank: <span class="text-white">${account.rank}</span></p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <p class="font-medium">Skins: <span class="text-white">${account.skins}</span></p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <p class="font-medium">Price: <span class="text-white">₹${account.price}</span></p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-lg">
+                        <p class="font-medium">Description:</p>
+                        <p class="mt-2 text-white">${account.description}</p>
+                    </div>
+                    <button onclick="closeModal()" class="w-full bg-indigo-500 text-white py-3 rounded-lg font-medium mt-6 hover:bg-indigo-600">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Function to approve account
+        async function approveAccount(accountId) {
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/admin/accounts/${accountId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to approve account');
+                }
+
+                // Refresh the accounts list
+                fetchAccounts(document.getElementById('statusFilter').value);
+                
+                // Show success message
+                alert('Account approved successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to approve account. Please try again.');
+            }
+        }
+
+        // Function to delete account
+        async function deleteAccount(accountId) {
+            if (!confirm('Are you sure you want to delete this account?')) {
+                return;
+            }
+
+            const token = checkAuth();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/admin/accounts/${accountId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete account');
+                }
+
+                // Refresh the accounts list
+                fetchAccounts(document.getElementById('statusFilter').value);
+                
+                // Show success message
+                alert('Account deleted successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete account. Please try again.');
+            }
+        }
+
+        // Function to close modal
+        function closeModal() {
+            document.getElementById('accountModal').classList.add('hidden');
+        }
+
+        // Event Listeners
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            fetchAccounts(e.target.value);
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            fetchAccounts(document.getElementById('statusFilter').value);
+        });
+
+        document.getElementById('accountModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('accountModal')) {
+                closeModal();
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/frontend/login.html';
+        });
+
+        // Check authentication before initial load
+        checkAuth();
+        // Initial load
+        fetchAccounts();
+    </script>
+</body>
+</html>
